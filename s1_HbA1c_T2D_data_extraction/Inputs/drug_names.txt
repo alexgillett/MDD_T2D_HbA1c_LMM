@@ -1,0 +1,187 @@
+drug_name	drug_substance	drug_class1	drug_class2
+vipidia	alogliptin	DPP4i	
+alogliptin	alogliptin	DPP4i	
+linagliptin	linagliptin	DPP4i	
+trajenta	linagliptin	DPP4i	
+onglyza	saxagliptin	DPP4i	
+saxagliptin	saxagliptin	DPP4i	
+januvia	sitagliptin	DPP4i	
+sitagliptin	sitagliptin	DPP4i	
+vildagliptin	vildagliptin	DPP4i	
+galvus	vildagliptin	DPP4i	
+qtern	saxagliptin and dapagliflozin	DPP4i	SGLT2i
+albiglutide	albiglutide	GLP1Ra	
+eperzan	albiglutide	GLP1Ra	
+trulicity	dulaglutide	GLP1Ra	
+dulaglutide	dulaglutide	GLP1Ra	
+bydureon	exenatide	GLP1Ra	
+exenatide	exenatide	GLP1Ra	
+byetta	exenatide	GLP1Ra	
+victoza	liraglutide	GLP1Ra	
+liraglutide	liraglutide	GLP1Ra	
+saxenda	liraglutide	GLP1Ra	
+lixisenatide	lixisenatide	GLP1Ra	
+lyxumia	lixisenatide	GLP1Ra	
+ozempic	semaglutide	GLP1Ra	
+semaglutide	semaglutide	GLP1Ra	
+xultophy	insulin and liraglutide	GLP1Ra	insulin
+canagliflozin	canagliflozin	SGLT2i	
+invokana	canagliflozin	SGLT2i	
+forxiga	dapagliflozin	SGLT2i	
+dapagliflozin	dapagliflozin	SGLT2i	
+jardiance	empagliflozin	SGLT2i	
+empagliflozin	empagliflozin	SGLT2i	
+steglatro	ertugliflozin	SGLT2i	
+ertugliflozin	ertugliflozin	SGLT2i	
+glizofar	pioglitazone	TZD	
+glidipion	pioglitazone	TZD	
+diabiom	pioglitazone	TZD	
+actos 	pioglitazone	TZD	
+pioglitazone	pioglitazone	TZD	
+rosiglitazone	rosiglitazone	TZD	
+avandia	rosiglitazone	TZD	
+troglitazone	troglitazone	TZD	
+romozin	troglitazone	TZD	
+glucobay	acarbose	acarbose	
+acarbose	acarbose	acarbose	
+neusulin	insulin	insulin	
+novorapid	insulin	insulin	
+h-tronin	insulin	insulin	
+novolet	insulin	insulin	
+monophane	insulin	insulin	
+hypurin	insulin	insulin	
+semitard	insulin	insulin	
+insulatard	insulin	insulin	
+biphasic	insulin	insulin	
+isophane	insulin	insulin	
+insuman	insulin	insulin	
+abasaglar	insulin	insulin	
+monotard	insulin	insulin	
+mixtard	insulin	insulin	
+tresiba	insulin	insulin	
+detemir	insulin	insulin	
+neuphane	insulin	insulin	
+degludec	insulin	insulin	
+insulin	insulin	insulin	
+protaphane	insulin	insulin	
+velasulin	insulin	insulin	
+lentard	insulin	insulin	
+apidra	insulin	insulin	
+aspart 	insulin	insulin	
+initard	insulin	insulin	
+endopancrine	insulin	insulin	
+rapitard	insulin	insulin	
+zinc lente	insulin	insulin	
+exubera	insulin	insulin	
+humaject	insulin	insulin	
+innolet	insulin	insulin	
+novomix	insulin	insulin	
+novo rapit	insulin	insulin	
+ultratard	insulin	insulin	
+quicksol	insulin	insulin	
+lantus	insulin	insulin	
+pur-in	insulin	insulin	
+ultralente	insulin	insulin	
+penmix	insulin	insulin	
+actraphane	insulin	insulin	
+glargine	insulin	insulin	
+insulat	insulin	insulin	
+semilente	insulin	insulin	
+toujeo	insulin	insulin	
+levemir	insulin	insulin	
+protamine zinc	insulin	insulin	
+actrapid	insulin	insulin	
+tempulin	insulin	insulin	
+velosulin	insulin	insulin	
+zinc suspension	insulin	insulin	
+humalog	insulin	insulin	
+lispro	insulin	insulin	
+glulisine	insulin	insulin	
+neulente	insulin	insulin	
+fiasp	insulin	insulin	
+semglee	insulin	insulin	
+humulin	insulin	insulin	
+starlix	nateglinide	meglitinide	
+nateglinide	nateglinide	meglitinide	
+novonorm	repaglinide	meglitinide	
+enyglid	repaglinide	meglitinide	
+prandin	repaglinide	meglitinide	
+repaglinide	repaglinide	meglitinide	
+metuxtan	metformin	metformin	
+yaltormin	metformin	metformin	
+milform	metformin	metformin	
+glyformin	metformin	metformin	
+diagemet	metformin	metformin	
+glucamet	metformin	metformin	
+meijumet	metformin	metformin	
+glucophage	metformin	metformin	
+metabet	metformin	metformin	
+ledermetin	metformin	metformin	
+bolamyn	metformin	metformin	
+metsol	metformin	metformin	
+metformin	metformin	metformin	
+sukkarto	metformin	metformin	
+vipdomet	metformin and alogliptin	metformin	DPP4i
+jentadueto	metformin and linagliptin	metformin	DPP4i
+komboglyze	metformin and saxagliptin	metformin	DPP4i
+kombiglyze	metformin and saxagliptin	metformin	DPP4i
+janumet	metformin and sitagliptin	metformin	DPP4i
+eucreas	metformin and vildagliptin	metformin	DPP4i
+vokanamet	metformin and canagliflozin	metformin	SGLT2i
+xigduo	metformin and dapagliflozin	metformin	SGLT2i
+synjardy	metformin and empagliflozin	metformin	SGLT2i
+competact	metformin and pioglitazone	metformin	TZD
+avandamet	metformin and rosiglitazone	metformin	TZD
+acetohexamide	acetohexamide	sulfonylurea	
+dimelor	acetohexamide	sulfonylurea	
+melitase	chlorpropamide	sulfonylurea	
+diabemide	chlorpropamide	sulfonylurea	
+glymese	chlorpropamide	sulfonylurea	
+chlorpropamide	chlorpropamide	sulfonylurea	
+diabinese	chlorpropamide	sulfonylurea	
+gliken	glibenclamide	sulfonylurea	
+calabren	glibenclamide	sulfonylurea	
+diabetamide	glibenclamide	sulfonylurea	
+glibenclamide	glibenclamide	sulfonylurea	
+lederglib	glibenclamide	sulfonylurea	
+euglucon	glibenclamide	sulfonylurea	
+daonil	glibenclamide	sulfonylurea	
+abbenclamide	glibenclamide	sulfonylurea	
+malix	glibenclamide	sulfonylurea	
+libanil	glibenclamide	sulfonylurea	
+glibornuride	glibornuride	sulfonylurea	
+glutril	glibornuride	sulfonylurea	
+zicron	gliclazide	sulfonylurea	
+edicil	gliclazide	sulfonylurea	
+diamicron	gliclazide	sulfonylurea	
+glimil	gliclazide	sulfonylurea	
+vamju	gliclazide	sulfonylurea	
+ziclaseg	gliclazide	sulfonylurea	
+gliclazide	gliclazide	sulfonylurea	
+diaglyk	gliclazide	sulfonylurea	
+nazdol	gliclazide	sulfonylurea	
+vitile	gliclazide	sulfonylurea	
+dacadis	gliclazide	sulfonylurea	
+laaglyda	gliclazide	sulfonylurea	
+vivazide	gliclazide	sulfonylurea	
+bilxona	gliclazide	sulfonylurea	
+glimepiride	glimepiride	sulfonylurea	
+niddaryl	glimepiride	sulfonylurea	
+amaryl	glimepiride	sulfonylurea	
+minodiab	glipizide	sulfonylurea	
+glibenese	glipizide	sulfonylurea	
+glipizide	glipizide	sulfonylurea	
+glurenorm	gliquidone	sulfonylurea	
+gliquidone	gliquidone	sulfonylurea	
+gondafon	glymidine	sulfonylurea	
+glymidine	glymidine	sulfonylurea	
+redul	glymidine	sulfonylurea	
+grenamide	grenamide	sulfonylurea	
+sulfonylurea	sulfonylurea	sulfonylurea	
+tolazamide	tolazamide	sulfonylurea	
+tolanase	tolazamide	sulfonylurea	
+rastinon	tolbutamide	sulfonylurea	
+tolbutamide	tolbutamide	sulfonylurea	
+pramidex	tolbutamide	sulfonylurea	
+orabet	tolbutamide	sulfonylurea	
+glyconon	tolbutamide	sulfonylurea	

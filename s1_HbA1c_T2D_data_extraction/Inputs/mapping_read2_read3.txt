@@ -1,0 +1,24 @@
+READV2_CODE	READV2_DESC	READV3_CODE	TERMV3_DESC			
+42W..	Hb. A1C - diabetic control	XE24t	Hb. A1C - diabetic control			
+42W1.	Hb. A1C < 7% - good control	42W1.	Hb. A1C < 7% - good control			
+42W2.	Hb. A1C 7-10% - borderline	42W2.	Hb. A1C 7-10% - borderline			
+42W3.	Hb. A1C > 10% - bad control	42W3.	Hb. A1C > 10% - bad control			
+42W4.	HbA1c level (DCCT aligned)	XaERp	HbA1c level (DCCT aligned)			
+42W5.	Haemoglobin A1c level - IFFC	XaPbt	Haemoglobin A1c level - IFCC			
+42W50	HbA1c level (diagnostic reference range) - IFCC	Xaezd	HbA1c level (diagnostic reference range) - IFCC			
+42W51	HbA1c level (monitoring ranges) - IFCC	Xaeze	HbA1c level (monitoring ranges) - IFCC			
+42WZ.	Hb. A1C - diabetic control NOS	42WZ.	Hb. A1C - diabetic control NOS			
+66Ae0	HbA1c target level - IFCC_	XaWP9	HbA1c target level - IFCC			
+44TB.	Haemoglobin A1c level	X772q	Haemoglobin A1c level			
+44TB0	Haemoglobin A1c (diagnostic reference range)	XabrE	Haemoglobin A1c (diagnostic reference range)			
+44TB1	Haemoglobin A1c (monitoring ranges)	XabrF	Haemoglobin A1c (monitoring ranges)			
+44TC.	Haemoglobin A1 level	XaBLm	Haemoglobin A1 level			
+42c..	HbA1 - diabetic control	XaCES	HbA1 - diabetic control			
+42c0.	HbA1 < 7% - good control	XaCET	HbA1 less than 7% - good control			
+42c1.	HbA1 7 - 10% - borderline control	XaCEU	HbA1 7-10% - borderline control			
+42c2.	HbA1 > 10% - bad control	XaCEV	HbA1 greater than 10% - bad control			
+42c3.	HbA1 level (DCCT aligned)	XaERo	HbA1 level (DCCT aligned)			
+44TL.	Total glycosylated haemoglobin level	XaJNg	Total glycosylated haemoglobin level			
+						
+						
+						
