@@ -77,11 +77,17 @@ All extraction is done using the ukbkings package in R. Please adapt scripts to 
 
 ### 6. s6_LDA_run_models
 
-#### LDA_unadjusted: Folder containing the script (R) to run the unadjusted linear mixed effects models. Analysis does not use imputed data. Code can be submitted as a batch job (user to write own job submission script). Models are run with both maximum likelihood (ML) estimation (for fixed effect model p-values) and restricted maximum likelihood (REML) estimation (for model parameter estimates).
+#### LDA_unadjusted
 
-#### LDA_adjusted: Folder containing the script (R) to run the adjusted linear mixed effects model. This is the selected unadjusted model plus additional covariates. Analysis uses imputed data. Code can be submitted as batch jobs (user to write own job submission script). Model-code split into 5 scripts- each script runs the same models but in different imputation datasets in subgroups of 10 MI datasets per script. Models are run with both maximum likelihood (ML) estimation (for fixed effect model p-values) and restricted maximum likelihood (REML) estimation (for model parameter estimates).
+Folder containing the script (R) to run the unadjusted linear mixed effects models. Analysis does not use imputed data. Code can be submitted as a batch job (user to write own job submission script). Models are run with both maximum likelihood (ML) estimation (for fixed effect model p-values) and restricted maximum likelihood (REML) estimation (for model parameter estimates).
 
-#### LDA_variance: Folder containing the script (R) to run the adjusted linear mixed effects model with MDD allowed to impact within-individual variation. Analysis uses imputed data. Three models considered: 1) pre-T2D MDD (binary) impacting residual HbA1c variation (REMLvar_pret2d_diff scripts), 2) time-varying post-T2D MDD (binary) impacting residual HbA1c variation (REMLvar_postt2dTV_diff scripts), and 3) retrospective post-T2D MDD (binary) impacting residual HbA1c variation (REMLvar_postt2d_retro_diff scripts). Code can be submitted as batch jobs (user to write own job submission script). Model-code split into 5 scripts- each script runs the same models but in different imputation datasets in subgroups of 10 MI datasets per script. Models are run using restricted maximum likelihood (REML) estimation only since variance parameters are those of interest here. 
+#### LDA_adjusted 
+
+Folder containing the script (R) to run the adjusted linear mixed effects model. This is the selected unadjusted model plus additional covariates. Analysis uses imputed data. Code can be submitted as batch jobs (user to write own job submission script). Model-code split into 5 scripts- each script runs the same models but in different imputation datasets in subgroups of 10 MI datasets per script. Models are run with both maximum likelihood (ML) estimation (for fixed effect model p-values) and restricted maximum likelihood (REML) estimation (for model parameter estimates).
+
+#### LDA_variance
+
+Folder containing the script (R) to run the adjusted linear mixed effects model with MDD allowed to impact within-individual variation. Analysis uses imputed data. Three models considered: 1) pre-T2D MDD (binary) impacting residual HbA1c variation (REMLvar_pret2d_diff scripts), 2) time-varying post-T2D MDD (binary) impacting residual HbA1c variation (REMLvar_postt2dTV_diff scripts), and 3) retrospective post-T2D MDD (binary) impacting residual HbA1c variation (REMLvar_postt2d_retro_diff scripts). Code can be submitted as batch jobs (user to write own job submission script). Model-code split into 5 scripts- each script runs the same models but in different imputation datasets in subgroups of 10 MI datasets per script. Models are run using restricted maximum likelihood (REML) estimation only since variance parameters are those of interest here. 
 
 
 ### 7. s7_LDA_summary
