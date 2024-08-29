@@ -4,7 +4,7 @@
 ### Authors: Saskia Hagenaars, Alexandra C Gillett
 ############################################################################
 # User add library path where R packages are stored if required:
-#.libPaths(new = "your_rlibrary_path")
+.libPaths(new = "your_rlibrary_path")
 # Data extraction uses ukbkings package
 # https://github.com/kenhanscombe/ukbkings
 # ukbkings requires data to be formatted using ukbproject
@@ -21,7 +21,7 @@ inputs_dir <- "/path_to_provided_input_data/"
 hba1c_data_output <- "/path_to_where_to_save_extracted_data/"
 ############################################################################
 ### Extract individuals with a diabetes diagnosis code in the
-### GP records
+### GP records- uses ukbkings commands
 ############################################################################
 gp_clinical <- bio_record(project_dir, "gp_clinical")
 

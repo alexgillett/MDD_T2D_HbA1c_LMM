@@ -3,7 +3,7 @@
 ### is being stored, so that UK Biobank assessment data fields can be
 ### saved for use in data extraction via ukbkings
 ############################################################################
-cd path_where_you_to_store_your_analysis_output
+cd path_to_where_you_store_your_analysis_output
 cd hba1c_LMM
 cd data
 ### Create file to store field identifiers from UK Biobank for required covariates

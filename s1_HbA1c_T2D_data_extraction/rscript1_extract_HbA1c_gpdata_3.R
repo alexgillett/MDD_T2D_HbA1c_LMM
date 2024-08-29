@@ -1,5 +1,5 @@
 ############################################################################
-### 1.2. HbA1c extraction from GP records, plus prescription extractions
+### 1.3. HbA1c extraction from GP records, plus prescription extractions
 ############################################################################
 ### In this script we:
 ### 1. Extract HbA1c data from the GP records, and,
@@ -34,7 +34,7 @@ readv3=fread(paste(inputs_dir, "read3_code_term", sep=""),header=T)
 ### Previously readv2 rows 21:22 were blank.
 ### Just to be sure remove rows before starting, and save.
 readv2 <-readv2[1:20, ]
-#fwrite(readv2, paste(inputs_dir, "mapping_read2_read3.txt", sep=""))
+fwrite(readv2, paste(inputs_dir, "mapping_read2_read3.txt", sep=""))
 
 # separately extract read 2 and then map these to read3 code before extracting read3 and binding rows
 # extract read 2 codes and add mapped read3 codes and terms
@@ -59,7 +59,7 @@ fwrite(gp_HbA1c_read2, paste(hba1c_data_output, "gp_HbA1c_read2_extracted.txt", 
 fwrite(gp_HbA1c_read3, paste(hba1c_data_output, "gp_HbA1c_read3_extracted.txt"), sep="", col.names=T,row.names=F,quote=F,sep="\t")
 
 ############################################################################
-### b2. Extract medication data (using drug names, and read codes if drug
+### 2. Extract medication data (using drug names, and read codes if drug
 ### name is missing
 ############################################################################
 gp_scripts <- bio_record(project_dir, "gp_scripts")

@@ -59,7 +59,7 @@ library(readr)
 library(zoo)
 library(ukbkings)
 ### Assign paths to relevant directories
-hba1c_dat_path <- "/path_where_you_to_store_extracted_data/hba1c_data/"
+hba1c_dat_path <- "/path_to_where_you_store_extracted_data/hba1c_data/"
 project_dir <- "/path_to_your_ukb_data_dir/"
 depression_dir <- "/path_to_extracted_depression_data/"
 analysis_dir <- "/path_to_analysis_dir/"
@@ -136,19 +136,10 @@ bio_phen(
 ############################################################################
 t2d_wrk <- readRDS(paste(hba1c_dat_path, "data/hba1c_t2d_mdd_medication_clean.rds", sep=""))
 
-sum(is.na(t2d_wrk$dob)) # 0
-sum(is.na(t2d_wrk$first_t2d_date)) # 0
 ### Create age at T2D diagnosis
 t2d_wrk <- t2d_wrk %>% mutate(age_t2d_diag = time_length(interval(as.Date(dob), as.Date(first_t2d_date)), "years"))
 ### Restrict to over 18
 t2d_wrk <- t2d_wrk[t2d_wrk$age_t2d_diag > 18, ]
-length(unique(t2d_wrk$eid)) # 17544
-
-### Double check number of rows per individual...
-#t2d_dt <- data.table(t2d_wrk, key="eid")
-#out <- t2d_dt[, .(rowCount = .N), by=eid]
-#any(out$rowCount < 2) # FALSE
-#rm(t2d_dt)
 
 ### List of EIDs included in dataset
 eids_t2d <- unique(t2d_wrk$eid)
@@ -164,7 +155,6 @@ gp_bmi_read3_22k <- gp_clinical %>%
 dim(gp_bmi_read3_22k) # 1129676       8
 gp_bmi_read3_22k <- gp_bmi_read3_22k[gp_bmi_read3_22k$eid %in% eids_t2d, ]
 dim(gp_bmi_read3_22k)
-# [1] 229645      8
 
 ### Search v2
 gp_bmi_read2_22k <- gp_clinical %>% 
@@ -173,7 +163,6 @@ gp_bmi_read2_22k <- gp_clinical %>%
 dim(gp_bmi_read2_22k) #  473277      8
 gp_bmi_read2_22k <- gp_bmi_read2_22k[gp_bmi_read2_22k$eid %in% eids_t2d, ]
 dim(gp_bmi_read2_22k)
-# [1] 113049      8
 
 ### 2 additional read 3 codes mentioned online: Xa7wG and X76CO
 #gp_bmi_read3_Xa7wG <- gp_clinical %>% 
@@ -188,7 +177,6 @@ dim(gp_bmi_read2_22k)
 #gp_bmi_read2_Xa7wG <- gp_clinical %>% 
 #    filter(str_detect(read_2, "Xa7wG")) %>%
 #    collect()
-#dim(gp_bmi_read2_Xa7wG) # [1] 0  8 ### nothing there
 #rm(gp_bmi_read2_Xa7wG)
 #
 #gp_bmi_read3_X76CO <- gp_clinical %>% 
@@ -200,12 +188,10 @@ dim(gp_bmi_read2_22k)
 ### What are 'viable'/ reasonable values of BMI. What may be data input errors...
 ### The following article dropped BMI outside of range 5-200 kg/m2
 ### Bhaskaran K, Forbes HJ, Douglas I, et al Representativeness and optimal use of body mass index (BMI) in the UK Clinical Practice Research Datalink (CPRD) BMJ Open 2013;3:e003389. doi: 10.1136/bmjopen-2013-003389
-gp_bmi_read2_22k
-gp_bmi_read3_22k
 
 ### BMI data cleaning
 ### Start with read 2...
-range(gp_bmi_read2_22k$value1) # ""       "98.000"
+range(gp_bmi_read2_22k$value1)
 table(gp_bmi_read2_22k$read_2)
 
 table(gp_bmi_read2_22k$value1)[1:10] ### has "^" included- set to ""
@@ -226,39 +212,34 @@ gp_bmi_read2_22k_1 <- gp_bmi_read2_22k_1 %>%
 
 table(gp_bmi_read2_22k_1$sum_miss)
 ### both missing -> remove
-#check <- gp_bmi_read2_22k_1[gp_bmi_read2_22k_1$sum_miss == 2, ]
-#check
-#rm(check)
+
 gp_bmi_read2_22k_1 <- gp_bmi_read2_22k_1[gp_bmi_read2_22k_1$sum_miss != 2, ]
-### 1 == keep as this means just one column has a value...
-#check <- gp_bmi_read2_22k_1[gp_bmi_read2_22k_1$sum_miss == 0, ]
-#check
-# rm(check)
-### 3 individuals with 2 values- hard to know which to use so rm
+
+### Remove individuals with 2 values (because it is hard to know which to use)
 gp_bmi_read2_22k_1 <- gp_bmi_read2_22k_1[gp_bmi_read2_22k_1$sum_miss != 0, ]
 
 ### Make BMI numeric and combine BMI values from value1 and value3
 gp_bmi_read2_22k_1 %>% mutate(bmi = as.numeric(value1)) -> gp_bmi_read2_22k_1
 gp_bmi_read2_22k_1 %>% mutate(bmi3 = as.numeric(value3)) -> gp_bmi_read2_22k_1
-sum(is.na(gp_bmi_read2_22k_1$bmi)) # 18621
-sum(!is.na(gp_bmi_read2_22k_1$bmi3)) #18621
-gp_bmi_read2_22k_1 %>% 
+
+gp_bmi_read2_22k_1 %>%
     mutate(bmi = ifelse(is.na(bmi), bmi3, bmi)) -> gp_bmi_read2_22k_1
-sum(is.na(gp_bmi_read2_22k_1$bmi)) # 0
 
 gp_bmi_read2_22k_1 %>% select(eid, data_provider, event_dt, bmi) -> gp_bmi_read2_22k_1
-dim(gp_bmi_read2_22k_1) # 95970     4
-length(unique(gp_bmi_read2_22k_1$eid)) # 5291
+dim(gp_bmi_read2_22k_1)
+length(unique(gp_bmi_read2_22k_1$eid))
+
 gp_bmi_read2_22k_1 <- gp_bmi_read2_22k_1[gp_bmi_read2_22k_1$bmi >= 5, ]
 gp_bmi_read2_22k_1 <- gp_bmi_read2_22k_1[gp_bmi_read2_22k_1$bmi <=200, ]
-dim(gp_bmi_read2_22k_1) # 95525     4
-length(unique(gp_bmi_read2_22k_1$eid)) # 5291
-any(is.na(gp_bmi_read2_22k_1$event_dt)) # F
-any(gp_bmi_read2_22k_1$event_dt == "") # T
-sum(gp_bmi_read2_22k_1$event_dt == "") # 4
+dim(gp_bmi_read2_22k_1)
+length(unique(gp_bmi_read2_22k_1$eid))
+
+any(is.na(gp_bmi_read2_22k_1$event_dt))
+any(gp_bmi_read2_22k_1$event_dt == "")
+sum(gp_bmi_read2_22k_1$event_dt == "")
 gp_bmi_read2_22k_1 <- gp_bmi_read2_22k_1[gp_bmi_read2_22k_1$event_dt != "", ]
-dim(gp_bmi_read2_22k_1) # 95521     4
-length(unique(gp_bmi_read2_22k_1$eid)) # 5291
+dim(gp_bmi_read2_22k_1)
+length(unique(gp_bmi_read2_22k_1$eid))
 
 ### move onto read3...
 
@@ -268,35 +249,30 @@ table(gp_bmi_read3_22k$value3) ### Value 3 all ""... But check in future extract
 
 gp_bmi_read3_22k_1 <- gp_bmi_read3_22k[gp_bmi_read3_22k$value1 != "", ]
 gp_bmi_read3_22k_1 %>% mutate(bmi = as.numeric(value1)) -> gp_bmi_read3_22k_1
-sum(is.na(gp_bmi_read3_22k_1$bmi)) # 0
-range(gp_bmi_read3_22k_1$bmi) # 0.000 135.087
+sum(is.na(gp_bmi_read3_22k_1$bmi))
+range(gp_bmi_read3_22k_1$bmi)
 
 gp_bmi_read3_22k_1 %>% select(eid, data_provider, event_dt, bmi) -> gp_bmi_read3_22k_1
-
-dim(gp_bmi_read3_22k_1) # 221878      4
-length(unique(gp_bmi_read3_22k_1$eid)) # 12263
+dim(gp_bmi_read3_22k_1)
+length(unique(gp_bmi_read3_22k_1$eid))
 
 gp_bmi_read3_22k_1 <- gp_bmi_read3_22k_1[gp_bmi_read3_22k_1$bmi >= 5, ]
 gp_bmi_read3_22k_1 <- gp_bmi_read3_22k_1[gp_bmi_read3_22k_1$bmi <=200, ]
-dim(gp_bmi_read3_22k_1) # 218376      4
-length(unique(gp_bmi_read3_22k_1$eid)) # 12261
+dim(gp_bmi_read3_22k_1)
+length(unique(gp_bmi_read3_22k_1$eid))
 
-any(is.na(gp_bmi_read3_22k_1$event_dt)) # F
-any(gp_bmi_read3_22k_1$event_dt == "") # T
-sum(gp_bmi_read3_22k_1$event_dt == "") # 91
+any(is.na(gp_bmi_read3_22k_1$event_dt))
+any(gp_bmi_read3_22k_1$event_dt == "")
+sum(gp_bmi_read3_22k_1$event_dt == "")
 gp_bmi_read3_22k_1 <- gp_bmi_read3_22k_1[gp_bmi_read3_22k_1$event_dt != "", ]
-dim(gp_bmi_read3_22k_1) #  218285      4
-length(unique(gp_bmi_read3_22k_1$eid)) # 12261
+dim(gp_bmi_read3_22k_1)
+length(unique(gp_bmi_read3_22k_1$eid))
 
 ### Combine read2 and read3 BMI observations...
 gp_bmi <- gp_bmi_read3_22k_1 %>% bind_rows(gp_bmi_read2_22k_1)
-dim(gp_bmi) # 313806      4
-length(unique(gp_bmi$eid)) # 17469
+
 gp_bmi %>% mutate(event_dt = as.Date(event_dt, "%d/%m/%Y")) %>%
     distinct() -> gp_bmi1
-
-dim(gp_bmi1) # 302422      4
-length(unique(gp_bmi1$eid)) # 17469
 
 gp_bmi2 <- gp_bmi1 %>% select(-data_provider)
 rm(gp_bmi1)
@@ -320,8 +296,8 @@ df_bmi <- df_bmi0 %>%
 
 df_bmi <- df_bmi[!is.na(df_bmi$bmi), ]
 
-any(df_bmi$event_dt == "") # F
-any(is.na(df_bmi$event_dt)) # F
+any(df_bmi$event_dt == "")
+any(is.na(df_bmi$event_dt))
 ### All BMI
 df_bmi <- df_bmi%>% distinct()
 ### BMI restricted to T2D individuals
@@ -361,16 +337,16 @@ eids_t2d <- unique(t2d_wrk$eid)
 gp_wgt_read3_22a <- gp_clinical %>% 
     filter(str_detect(read_3, "22A..")) %>%
     collect()
-dim(gp_wgt_read3_22a) # 1160956       8
+dim(gp_wgt_read3_22a)
 
 gp_wgt_read3_22a <- gp_wgt_read3_22a[gp_wgt_read3_22a$eid %in% eids_t2d, ]
-dim(gp_wgt_read3_22a) ### [1] 237540      8
+dim(gp_wgt_read3_22a)
 
 ### Search read2 column for main code
 gp_wgt_read2_22a <- gp_clinical %>%
     filter(str_detect(read_2, "22A..")) %>%
     collect()
-dim(gp_wgt_read2_22a) # 492581       8
+dim(gp_wgt_read2_22a)
 
 ### Restrict to T2D EIDs.
 gp_wgt_read2_22a <- gp_wgt_read2_22a[gp_wgt_read2_22a$eid %in% eids_t2d, ]
@@ -382,45 +358,45 @@ dim(gp_wgt_read2_22a)
 gp_wgt_read2_1622 <- gp_clinical %>%
     filter(str_detect(read_2, "X76CG")) %>%
     collect()
-dim(gp_wgt_read2_1622) # [1] 701   8
+dim(gp_wgt_read2_1622)
 gp_wgt_read2_X76CG <- gp_clinical %>% 
     filter(str_detect(read_2, "X76CG")) %>%
     collect()
-dim(gp_wgt_read2_X76CG) # 0 8
+dim(gp_wgt_read2_X76CG)
 gp_wgt_read2_XM01G <- gp_clinical %>% 
     filter(str_detect(read_2, "XM01G")) %>%
     collect()
-dim(gp_wgt_read2_XM01G) # 0 8 
+dim(gp_wgt_read2_XM01G)
 gp_wgt_read2_XE1h4 <- gp_clinical %>% 
     filter(str_detect(read_2, "XE1h4")) %>%
     collect()
-dim(gp_wgt_read2_XE1h4) # 0 8
+dim(gp_wgt_read2_XE1h4)
 gp_wgt_read2_Xa7wI <- gp_clinical %>% 
     filter(str_detect(read_2, "Xa7wI")) %>%
     collect()
-dim(gp_wgt_read2_Xa7wI) # 0 8
+dim(gp_wgt_read2_Xa7wI)
 rm(gp_wgt_read2_X76CG, gp_wgt_read2_Xa7wI, gp_wgt_read2_XE1h4, gp_wgt_read2_XM01G)
 ### Check read3
 gp_wgt_read3_1662 <- gp_clinical %>%
     filter(str_detect(read_3, "1662")) %>%
     collect()
-dim(gp_wgt_read3_1662) # [1] 48  8
+dim(gp_wgt_read3_1662)
 gp_wgt_read3_X76CG <- gp_clinical %>% 
     filter(str_detect(read_3, "X76CG")) %>%
     collect()
-dim(gp_wgt_read3_X76CG) # [1] 1 8
+dim(gp_wgt_read3_X76CG)
 gp_wgt_read3_XM01G <- gp_clinical %>% 
     filter(str_detect(read_3, "XM01G")) %>%
     collect()
-dim(gp_wgt_read3_XM01G) # [1] 1874    8
+dim(gp_wgt_read3_XM01G)
 gp_wgt_read3_XE1h4 <- gp_clinical %>% 
     filter(str_detect(read_3, "XE1h4")) %>%
     collect()
-dim(gp_wgt_read3_XE1h4) # [1] 290   8
+dim(gp_wgt_read3_XE1h4)
 gp_wgt_read3_Xa7wI <- gp_clinical %>% 
     filter(str_detect(read_3, "Xa7wI")) %>%
     collect()
-dim(gp_wgt_read3_Xa7wI) # [1] 20  8
+dim(gp_wgt_read3_Xa7wI)
 ### Bind extracted data from additonal weight codes together
 gp_wgt_other <- rbind(gp_wgt_read2_1622, gp_wgt_read3_1622, gp_wgt_read3_X76CG,
 gp_wgt_read3_XM01G, gp_wgt_read3_XE1h4, gp_wgt_read3_Xa7wI)
@@ -432,7 +408,7 @@ gp_wgt_read3_XM01G, gp_wgt_read3_XE1h4, gp_wgt_read3_Xa7wI)
 
 ### Initial data cleaning for weight data:
 ### Start with read 2...
-range(gp_wgt_read2_22a$value1) # ""       "998"
+range(gp_wgt_read2_22a$value1)
 table(gp_wgt_read2_22a$read_2)
 
 table(gp_wgt_read2_22a$value1)[1:10] ### has "^" included- set to ""
@@ -460,9 +436,9 @@ gp_wgt_read2_22a_1 <- gp_wgt_read2_22a_1[gp_wgt_read2_22a_1$wgt >= 30, ]
 gp_wgt_read2_22a_1 <- gp_wgt_read2_22a_1[gp_wgt_read2_22a_1$wgt <=200, ]
 
 ### Check for valid event_dt:
-any(is.na(gp_wgt_read2_22a_1$event_dt)) # F
-any(gp_wgt_read2_22a_1$event_dt == "") # T
-sum(gp_wgt_read2_22a_1$event_dt == "") # 10
+any(is.na(gp_wgt_read2_22a_1$event_dt))
+any(gp_wgt_read2_22a_1$event_dt == "")
+sum(gp_wgt_read2_22a_1$event_dt == "")
 gp_wgt_read2_22a_1 <- gp_wgt_read2_22a_1[gp_wgt_read2_22a_1$event_dt != "", ]
 
 ### move onto read3...
@@ -474,7 +450,7 @@ table(gp_wgt_read3_22a$value3) ### Value 3 all ""... But check in future extract
 ### Restrict to those without missing in value1, make weight numberic
 gp_wgt_read3_22a_1 <- gp_wgt_read3_22a[gp_wgt_read3_22a$value1 != "", ]
 gp_wgt_read3_22a_1 %>% mutate(wgt = as.numeric(value1)) -> gp_wgt_read3_22a_1
-sum(is.na(gp_wgt_read3_22a_1$wgt)) # 0
+sum(is.na(gp_wgt_read3_22a_1$wgt))
 ### Restrict to 'valid' weights
 gp_wgt_read3_22a_1 <- gp_wgt_read3_22a_1[gp_wgt_read3_22a_1$wgt >= 30, ]
 gp_wgt_read3_22a_1 <- gp_wgt_read3_22a_1[gp_wgt_read3_22a_1$wgt <=200, ]
@@ -482,9 +458,9 @@ gp_wgt_read3_22a_1 <- gp_wgt_read3_22a_1[gp_wgt_read3_22a_1$wgt <=200, ]
 gp_wgt_read3_22a_1 %>% select(eid, data_provider, event_dt, wgt) -> gp_wgt_read3_22a_1
 
 ### Check dates:
-any(is.na(gp_wgt_read3_22a_1$event_dt)) # F
-any(gp_wgt_read3_22a_1$event_dt == "") # T
-sum(gp_wgt_read3_22a_1$event_dt == "") # 122
+any(is.na(gp_wgt_read3_22a_1$event_dt))
+any(gp_wgt_read3_22a_1$event_dt == "")
+sum(gp_wgt_read3_22a_1$event_dt == "")
 gp_wgt_read3_22a_1 <- gp_wgt_read3_22a_1[gp_wgt_read3_22a_1$event_dt != "", ]
 
 ### Combine read2 and read3 weight observations...
@@ -514,17 +490,17 @@ gp_wgt_other <- gp_wgt_other[gp_wgt_other$value1 != "", ]
 ### Make weight numeric
 gp_wgt_other %>% mutate(wgt = as.numeric(value1)) -> gp_wgt_other
 ### Check for missing data
-sum(is.na(gp_wgt_other$wgt)) # 0
+sum(is.na(gp_wgt_other$wgt))
 ### Remove 'invalid' weight measurements
 gp_wgt_other <- gp_wgt_other[gp_wgt_other$wgt >= 30, ]
 gp_wgt_other <- gp_wgt_other[gp_wgt_other$wgt <=200, ]
-range(gp_wgt_other$wgt) ### 34.5 200
+range(gp_wgt_other$wgt)
 
 gp_wgt_other %>% select(eid, data_provider, event_dt, wgt) -> gp_wgt_other
 
 ### Check for missing event dates
-any(is.na(gp_wgt_other$event_dt)) # F
-any(gp_wgt_other$event_dt == "") # F
+any(is.na(gp_wgt_other$event_dt))
+any(gp_wgt_other$event_dt == "")
 
 ### Make the date into a date format R recognises using as.Date
 ### Remove repeat rows
@@ -532,7 +508,7 @@ gp_wgt_other %>% mutate(event_dt = as.Date(event_dt, "%d/%m/%Y")) %>%
     distinct() -> gp_wgt_other
 
 ### Check date range, and remove any with invalid dates
-range(gp_wgt_other$event_dt) ### "1990-07-02" "2017-04-05"
+range(gp_wgt_other$event_dt)
 
 gp_wgt_other <- gp_wgt_other %>% select(-data_provider)
 
@@ -551,16 +527,18 @@ rm(gp_wgt2)
 gp_hgt_read3_229 <- gp_clinical %>% 
     filter(str_detect(read_3, "229")) %>%
     collect()
-dim(gp_hgt_read3_229) ### [1] 737799      8
-gp_hgt_read2_229 <- gp_clinical %>% 
+dim(gp_hgt_read3_229)
+
+gp_hgt_read2_229 <- gp_clinical %>%
     filter(str_detect(read_2, "229")) %>%
     collect()
-dim(gp_hgt_read2_229) ### [1] 261435      8
+dim(gp_hgt_read2_229)
+
 ### Restrict to T2D EIDs
 gp_hgt_read2_229 <- gp_hgt_read2_229[gp_hgt_read2_229$eid %in% eids_t2d, ]
-dim(gp_hgt_read2_229) ### [1] 47819     8
+dim(gp_hgt_read2_229)
 gp_hgt_read3_229 <- gp_hgt_read3_229[gp_hgt_read3_229$eid %in% eids_t2d, ]
-dim(gp_hgt_read3_229) ### [1] 124225      8
+dim(gp_hgt_read3_229)
 
 ### Explore contents of columns
 table(gp_hgt_read2_229$value1)[1:100] ### has '^'
@@ -590,8 +568,9 @@ gp_hgt <- gp_hgt %>% mutate(hgt2 = hgt*100)
 ### If hgt2 outside of range = NA
 gp_hgt <- gp_hgt %>% mutate(hgt3 = ifelse(hgt <= 210 & hgt >= 125, hgt, ifelse(hgt2 <= 210 & hgt2 >= 125, hgt2, NA)))
 gp_hgt <- gp_hgt[!is.na(gp_hgt$hgt3), ]
-dim(gp_hgt) # [1] 166816      7
-length(unique(gp_hgt$eid)) # 17463
+dim(gp_hgt)
+length(unique(gp_hgt$eid))
+
 ### Tidy to just hgt3 and rename this as hgt
 gp_hgt <- gp_hgt %>% select(-read_2, -read_3, -hgt, -hgt2) %>% rename(hgt = hgt3)
 ### Focus on dates
@@ -636,7 +615,7 @@ hgt_ukb <- bio_rename(hgt_ukb, f)
 colnames(hgt_ukb)
 ### Make height into Ms
 hgt_ukb <- hgt_ukb %>% mutate(hgt = standing_height_f50_0_0/100) %>% select(-standing_height_f50_0_0)
-sum(is.na(hgt_ukb$hgt)) ### 2583
+sum(is.na(hgt_ukb$hgt))
 
 ############################################################################
 ### 8. Create additional BMI measurements with weight (GP) and height (UKB)
@@ -656,8 +635,8 @@ saveRDS(bmi_ds2, file=paste(hba1c_dat_path, "data/GP_t2d_BMIfrom_wgt.rds", sep="
 ############################################################################
 bmi_dt <- readRDS(paste(hba1c_dat_path, "data/t2d_bmi.rds", sep=""))
 bmi_dt2 <- bmi_dt %>% bind_rows(bmi_ds2) %>% distinct()
-dim(bmi_dt2) # [1] 650707      4
-length(unique(bmi_dt2$eid)) ### 17542
+dim(bmi_dt2)
+length(unique(bmi_dt2$eid))
 bmi_dt2$type[is.na(bmi_dt2$type)] <- "gp_bmi_wgt"
 
 saveRDS(bmi_dt2, file=paste(hba1c_dat_path, "data/t2d_bmi_bmiwgt.rds", sep=""))
@@ -671,13 +650,13 @@ saveRDS(bmi_dt2, file=paste(hba1c_dat_path, "data/t2d_bmi_bmiwgt.rds", sep=""))
 df.s <- readRDS(paste(hba1c_dat_path, "data/hba1c_t2d_mdd_medication_clean_over18.rds", sep=""))
 ### Make data.table
 dt.s <- data.table(df.s, key=c("eid", "event_dt"))
-length(unique(dt.s$eid)) ### 17544
+length(unique(dt.s$eid))
 
 ### Create time variable for analysis
 ### Just want to check that everyone has a unique T2D diagnosis date:
 ### For each EID extract their T2D diagnosis date
 summ6 <- dt.s[, (unique(as.Date(first_t2d_date), na.rm=T)), by=eid]
-sum(is.na(summ6$V1)) ### 0
+sum(is.na(summ6$V1))
 ### Create a data.table counting the number of rows for each EID in dt.s
 count6 <- dt.s[, .(rowCount = .N), by=eid]
 
@@ -689,26 +668,25 @@ df.s <- data.frame(dt.s)
 ### Create a time_base variable measuring the time between an observation and T2D diagnosis
 ### Negative dates -> observation occurred prior to T2D diagnosis
 df.s$time_base <- time_length(interval(as.Date(df.s$t2d_diag_date), as.Date(df.s$event_dt)),"years")
-range(df.s$time_base) ### -19.03005  56.16667
+range(df.s$time_base)
 dt.s <- data.table(df.s, key=c("eid", "event_dt"))
 df.s <- data.frame(dt.s)
 ### How many people have a baseline measurement?
-sum(as.numeric(df.s$time_base == 0)) ## 8575
+sum(as.numeric(df.s$time_base == 0))
 
 ### There are some duplicates still in data atm...
 ### I.e. multiple HbA1c measurements on same date
 ### Restrict to fewer key columns
 dt.s1 <- dt.s %>% select(eid, event_dt, hba1c, dob, type, depression, metformin:time_base)
-dim(dt.s1) # 355216     32
-length(unique(dt.s1$eid)) # 17544
+
 ### remove duplicates part 1:
 dt.s1 <- dt.s1%>% distinct()
-dim(dt.s1) # 303132     32
-length(unique(dt.s1$eid)) # 17544
+dim(dt.s1)
+length(unique(dt.s1$eid))
 dt.s <- dt.s1
 df.s <- data.frame(dt.s)
 ### Check for remaining duplicates
-sum(as.numeric(df.s$time_base == 0)) ### 7727 
+sum(as.numeric(df.s$time_base == 0))
 ### Check for duplicated baselines...
 ### restrict to baseline measurements
 test <- df.s[df.s$time_base == 0,]
@@ -717,7 +695,7 @@ test.dt <- data.table(test)
 dup <- test.dt[, .(rowCount = .N), by=eid]
 table(dup$rowCount)
 dup[dup$rowCount == 2, ] 
-dim(dup[dup$rowCount == 2, ] ) ### 107 2
+dim(dup[dup$rowCount == 2, ] )
 ### There are still date-duplicates (same date, different HbA1c values)
 ### order by eid and then time_base
 dt.s <- data.table(df.s, key=c("eid", "time_base")) 
@@ -777,8 +755,8 @@ for(i in 1:length(eids_hba1c)){
     test <- rbind(test, out)
     rm(out)
     }
-length(unique(test$eid)) ## 17544
-dim(test) ### 297141     32
+length(unique(test$eid))
+dim(test)
 
 dt.s <- data.table(test, key=c("eid", "event_dt"))
 df.s <- data.frame(dt.s)
@@ -795,10 +773,10 @@ saveRDS(dt.s,  file= paste(analysis_dir, "data/t2d_hba1c_o18_dups_removed.rds", 
 ids_with_t0 <- dt.s$eid[dt.s$time_base == 0]
 ### hba1c dataset for those WITHOUT baseline (not in the ID list)
 base0addin <- dt.s[!(eid %in% ids_with_t0), ]
-length(unique(base0addin$eid)) ### 9924
+length(unique(base0addin$eid))
 ### Find the minimum absolute time_base value (i.e. values closest to 0)
 abs_min <- base0addin[ , min(abs(time_base)), by=eid]
-dim(abs_min) ### 9924    2
+dim(abs_min)
 
 ### Count the rows for each EID
 count.tab <- base0addin[, .(rowCount = .N), by=eid]
@@ -818,9 +796,8 @@ rm_bin[(test$eid %in% id_list) & test$time_base > 0] <- 1
 test <- test[rm_bin == 0, ]
 count.tab <- test[, .(rowCount = .N), by=eid]
 table(count.tab$rowCount)
-#   1 
-#9924
 ### all 1 so no double ups now :-)
+
 ### Rename this dataset...
 base0addin <- test
 rm(test, id_list, rm_bin, count.tab)
@@ -906,7 +883,7 @@ base0addin[, medication_coded:= sum_meds]
 ### Create the four level medication variable
 base0addin$medication_coded[base0addin$insulin == 1] <- 3
 base0addin$medication_coded[base0addin$sum_meds >= 3] <- 3
-table(base0addin$sum_meds) ### 10 people in this subgroup on 2 meds at baseline -> these individuals need to be removed later.
+table(base0addin$sum_meds) ### note: people on 2 meds at baseline -> these individuals need to be removed later.
 
 ### join with orig dataset:
 dt.s <- dt.s %>% bind_rows(base0addin)
@@ -916,7 +893,7 @@ df.s <- data.frame(dt.s)
 
 ### For the depression variable- is it prevalent or time-varying?
 check.dep <- dt.s[, unique(depression), by=eid]
-dim(check.dep)[1] ### 17544 -> not time varying- is ever-never by end of study period...
+dim(check.dep)[1]
 ### Create a time-varying version...
 dt.s$event_dt <- as.Date(dt.s$event_dt, "%Y-%m-%d")
 dt.s$first_t2d_date <- as.Date(dt.s$first_t2d_date, "%Y-%m-%d")
@@ -924,7 +901,7 @@ dt.s$dob <- as.Date(dt.s$dob, "%Y-%m-%d")
 dt.s$dep_first_date <- as.Date(dt.s$dep_first_date, "%Y-%m-%d")
 dt.s <- dt.s %>% mutate(dep_tv = ifelse(is.na(dep_first_date), NA, as.numeric(dep_first_date <= event_dt)))
 check.dep <- dt.s[, unique(dep_tv), by=eid]
-dim(check.dep)[1] ### 18121 >> 17544 - time varying now
+dim(check.dep)[1] ### time varying now
 rm(check.dep)
 
 ### save intermediate file
@@ -939,27 +916,25 @@ saveRDS(dt.s, file=paste(analysis_dir, "data/t2d_hba1c_traj_analysis_prelim.rds"
 ### Age at T2D (< 18 removed)- done above
 ### at least one measurement >= 39, one of which must occur within a 6 month window of diagnosis
 ############################################################################
-length(unique(dt.s$eid)) #  17544
 ### Prescriptions at baseline check
 ### Since adding in a baseline row for those missing HbA1c at baseline we identify 12 more individuals with multi-medications at baseline
 dt0 <- dt.s[time_base ==0, ]
 rm_bin <- as.numeric(dt0$sum_meds > 1)
-sum(rm_bin, na.rm=T) ### 12
+
 rm_bin[is.na(rm_bin)] <- 0
 rm_eids <- dt0$eid[rm_bin == 1]
 
 dt.s <- dt.s[!(dt.s$eid %in% rm_eids), ]
 df.s <- data.frame(dt.s)
-length(unique(dt.s$eid)) ### 17532
 
 ### at least one measurement >= 39, one of which must occur within a 6 month window of diagnosis
 max_obs <- dt.s[, max(hba1c, na.rm=T), by=eid]
-range(max_obs$V1) ### 28 to 187
+range(max_obs$V1)
 rm_eids <- max_obs$eid[max_obs$V1 < 39]
-length(rm_eids) ### 53
+length(rm_eids)
 dt.s <- dt.s[!(dt.s$eid %in% rm_eids), ]
 df.s <- data.frame(dt.s)
-length(unique(dt.s$eid)) ### 17479
+length(unique(dt.s$eid))
 # one of which in 6 month window of diagnosis...
 wrk <- dt.s
 wrk[, min_int := t2d_diag_date %m-% months(6)]
@@ -967,24 +942,24 @@ wrk[, max_int := t2d_diag_date %m+% months(6)]
 bin1 <- as.numeric(wrk$event_dt <= wrk$max_int)
 bin1[wrk$event_dt < wrk$min_int] <- 0
 wrk <- wrk[bin1 == 1, ]
-length(unique(wrk$eid)) ### 17479
+length(unique(wrk$eid))
 ### need to remove those with no measurement within a 6 month window of diagnosis...
 wrk <- wrk[!is.na(hba1c), ]
-length(unique(wrk$eid)) ### 12942 have measurements within 6 month window of diagnosis...
+length(unique(wrk$eid))
 rm_eid <- unique(dt.s$eid[!(dt.s$eid %in% wrk$eid)])
-length(rm_eid) ### 4537
+length(rm_eid)
 
 ### Remove those with no measurement > 38 within 6 month window...
 max_obs <- wrk[, max(hba1c, na.rm=T), by=eid]
-range(max_obs$V1) # 15 184
-sum(max_obs$V1 < 39) ### 255
+range(max_obs$V1)
+sum(max_obs$V1 < 39)
 rm_eids2 <- max_obs$eid[max_obs$V1 < 39]
 
 rm_eid_combi <- unique(c(rm_eid, rm_eids2))
-length(rm_eid_combi) ### 4792
+length(rm_eid_combi)
 
 dt.s <- dt.s[!(eid %in% rm_eid_combi), ]
-length(unique(dt.s$eid)) # 12687
+length(unique(dt.s$eid))
 df.s <- data.frame(dt.s)
 
 ### Prescriptions of insulin within 1 year
@@ -993,12 +968,12 @@ df.s <- data.frame(dt.s)
 #table(med_counts$V1)
 #any(med_counts$insulin == 1) # FALSE - all insulin 1 year now removed
 
-length(unique(df.s$eid)) ### 12687
-max(df.s$time_base) ### 26.05191
+length(unique(df.s$eid))
+max(df.s$time_base)
 ### remove measurements after 10 years:
 df.s <- df.s[df.s$time_base <= 10, ]
-dim(df.s) ### 176980     35
-length(unique(df.s$eid)) ### 12687
+dim(df.s)
+length(unique(df.s$eid))
 dt.s <- data.table(df.s, key=c("eid", "event_dt"))
 count.tab <- dt.s[ , .(rowCount = .N), by=eid]
 table(count.tab$rowCount)
@@ -1013,10 +988,10 @@ saveRDS(dt.s, file=paste(analysis_dir, "data/MDDhba1c_imputeprep.txt", sep=""))
 ###########################################################################
 summ.pre <- dt.s[, sum(as.numeric(time_base < 0)), by=eid]
 table(summ.pre$V1)
-length(summ.pre$eid) ### 12687
+length(summ.pre$eid)
 summ.post <- dt.s[, sum(as.numeric(time_base > 0)), by=eid]
-table(summ.post$V1) ### there are 228 individuals with 0 measurements after diag, and 532 with only 1. Keep for imputation though
-length(summ.post$eid) ### 12687
+table(summ.post$V1)
+length(summ.post$eid)
 count.tab <- dt.s[ , .(rowCount = .N), by=eid]
 df.s <- data.frame(dt.s)
 obs_pre <- unlist(mapply(rep, x= summ.pre$V1, times= count.tab$rowCount))
@@ -1045,11 +1020,11 @@ bmi_dt <- readRDS(paste(hba1c_dat_path, "data/t2d_bmi_bmiwgt.rds", sep=""))
 diag_date <- dt.s[, unique(t2d_diag_date), by=eid]
 ### restrict BMI dataset to those in the current HbA1c trajectory dataset
 bmi_dt <- bmi_dt[bmi_dt$eid %in% unique(dt.s$eid), ]
-length(unique(bmi_dt$eid)) # 12685 (2 less than the hba1c dataset)
+length(unique(bmi_dt$eid))
 
 colnames(diag_date)[2] <- "t2d_diag_date"
 ### Double check BMI dates (as perhaps didn't with weight and height version?)
-range(bmi_dt$event_dt) # "1902-02-02" "2022-02-03"
+range(bmi_dt$event_dt)
 bmi_dt <- bmi_dt[bmi_dt$event_dt != "1902-02-02", ]
 
 ### Add T2D diagnosis date info to BMI dataset
@@ -1059,16 +1034,14 @@ bmi_dt <- data.table(bmi_dt, key=c("eid", "event_dt"))
 ### Create a time_diff variable
 bmi_dt[, time_diff:= time_length(interval(as.Date(t2d_diag_date), as.Date(event_dt)), "years")]
 #closest_bmi <- bmi_dt[, min(abs(time_diff)), by=eid]
-#range(closest_bmi$V1) # 0.00000 13.37534
+#range(closest_bmi$V1)
 ### Ok event range for baseline BMI is [-5, 2/12]...
 ### Restrict to individuals with BMI measurement(s) available between
 ### 5 years before and 2 months after a T2D diagnosis
 ### Know this is a WIDE window.
 bmi_dt2 <- bmi_dt[time_diff <= 2/12, ]
-length(unique(bmi_dt2$eid)) ### 12376
-range(bmi_dt2$time_diff) #  -35.8821918   0.1666667
 bmi_dt2 <- bmi_dt2[time_diff >= -5, ]
-length(unique(bmi_dt2$eid)) ### 12039
+length(unique(bmi_dt2$eid))
 ### Now need to select 1 obs per individual...
 ### The closest BMI observation to baseline
 ### Prioritise obsevation prior to T2D diagnosis if there is a absmin tie
@@ -1196,15 +1169,13 @@ dt.s <- dt.s %>% left_join(base_bmi)
 dt.s$dep_tv[dt.s$depression == 0] <- 0
 ### Restrict to baseline (t==0) 
 dt0 <- dt.s[time_base == 0, ]
-length(unique(dt.s$eid)) # [1] 12687
-length(unique(dt0$eid))  # [1] 12687
+length(unique(dt.s$eid))
+length(unique(dt0$eid))
 dt0 <- dt0 %>% select(eid, metformin:medication_coded, dep_tv)
 table(dt0$dep_tv)
-#    0     1 
-# 11474  1213 
+
 table(dt0$medication_coded)
-#    0    1 
-# 8941  449 
+
 colnames(dt0) <- c("eid", "metformin_base", "sulfonylurea_base", "TZD_base", "meglitinide_base", "acarbose_base", 
 "DPP4i_base", "GLP1Ra_base", "SGLT2i_base", "insulin_base", "sum_meds_base", "medication_coded_base", "dep_base")
 dt.s <- dt.s %>% left_join(dt0)
@@ -1383,8 +1354,7 @@ dt.s$dep_tv2 <- ifelse(dt.s$depression == 0, 0, ifelse(!is.na(dt.s$dep_first_dat
 dt.s <- dt.s %>% select(-dep_tv) %>% rename(dep_tv = dep_tv2)
 dt0 <- dt.s[time_base == 0, ]
 table(dt0$depression)
-#     0     1 
-# 11232  1451 
+
 ### Note. Have already removed those with depression but no depression date
 
 ### Create a variable to do with whether the individual will stay in the LDA.
@@ -1395,11 +1365,10 @@ dt.s <- data.table(dt.s, key=c("eid", "event_dt"))
 dt.s$lda_keep <- as.numeric(dt.s$obs_post > 0)
 
 saveRDS(dt.s, paste(hba1c_dat_path, "data/t2d_imputeprep_ds.rds", sep=""))
-length(unique(dt.s$eid[dt.s$lda_keep == 1])) # 12459
+length(unique(dt.s$eid[dt.s$lda_keep == 1]))
 dt0 <- dt.s[time_base == 0, ]
 table(dt0$depression[dt0$lda_keep == 1])
-###     0     1 
-###  11034  1425 
+
 
 ### Create dep_post variable
 dt.s <-  dt.s %>%
@@ -1407,11 +1376,9 @@ dt.s <-  dt.s %>%
 
 dt0 <- dt.s[time_base == 0, ]
 table(dt0$dep_base[dt0$lda_keep == 1])
-#    0     1 
-# 11471  1212 
+
 table(dt0$dep_post[dt0$lda_keep == 1])
-#    0     1 
-# 12444   239 
+
 
 ### Check on source of info for dep == 0
 #dep0 <- dt.s[depression == 0, ]
@@ -1425,15 +1392,14 @@ dep_post <- dep_post[lda_keep == 1, ]
 
 dep_post0 <- dep_post[time_base == 0, ]
 table(dep_post0$pop)
-# AFR AMR EUR SAS 
-#  6   3 187  21 
-sum(is.na(dep_post0$pop)) ## 22
+
+sum(is.na(dep_post0$pop))
 table(dep_post0$sr_ethnicity_f)
 sum(is.na(dep_post0$sr_ethnicity_f))
 
-sum(is.na(dep_post0$tdi)) ### 0
-sum(is.na(dep_post0$qualifications_f)) ### 5
-sum(is.na(dep_post0$ever_smk)) ### 2
+sum(is.na(dep_post0$tdi))
+sum(is.na(dep_post0$qualifications_f))
+sum(is.na(dep_post0$ever_smk))
 
 dep_post0$dep_time_diff <- time_length(interval(as.Date(dep_post0$first_t2d_date), as.Date(dep_post0$dep_first_date)),"years")
 
@@ -1548,18 +1514,18 @@ head(gp_clinical)
 gp_bp_read2_246 <- gp_clinical %>%
     filter(str_detect(read_2, "246..")) %>%
     collect()
-dim(gp_bp_read2_246) # 2001170       8
+dim(gp_bp_read2_246)
 ### Restrict to T2D cases
 gp_bp_read2_246 <- gp_bp_read2_246[gp_bp_read2_246$eid %in% eids_t2d, ]
-dim(gp_bp_read2_246) #  219825      8
+dim(gp_bp_read2_246)
 ### Search v3
 gp_bp_read3_246 <- gp_clinical %>% 
     filter(str_detect(read_3, "246..")) %>%
     collect()
-dim(gp_bp_read3_246) # 6071729       8
+dim(gp_bp_read3_246)
 ### Restrict to T2D cases
 gp_bp_read3_246 <- gp_bp_read3_246[gp_bp_read3_246$eid %in% eids_t2d, ]
-dim(gp_bp_read3_246) # 676523      8
+dim(gp_bp_read3_246)
 head(gp_bp_read3_246)
 
 ### Look at read 2
@@ -1582,8 +1548,8 @@ gp_bp_read2_246 <- gp_bp_read2_246[gp_bp_read2_246$value1 < 290]
 gp_bp_read2_246 <- gp_bp_read2_246[gp_bp_read2_246$value1 > 35]
 gp_bp_read2_246 <- gp_bp_read2_246[gp_bp_read2_246$value2 < 300]
 gp_bp_read2_246 <- gp_bp_read2_246[gp_bp_read2_246$value2 > 35]
-range(gp_bp_read2_246$value1) ### 38 260
-range(gp_bp_read2_246$value2) ### 37 230
+range(gp_bp_read2_246$value1)
+range(gp_bp_read2_246$value2)
 gp_bp_read2_246$event_dt <- as.Date(gp_bp_read2_246$event_dt, "%d/%m/%Y")
 gp_bp_read2_246 <- data.table(gp_bp_read2_246, key=c("eid", "event_dt"))
 sbp_read2 <- apply(data.frame(cbind(gp_bp_read2_246$value1, gp_bp_read2_246$value2)),1, FUN=max)
@@ -1689,11 +1655,11 @@ sbp_all <- sbp_all %>%
 ### Restrict to time window [-5 years, +2 months]
 sbp_tmp <- sbp_all[time_diff >= -5, ]
 sbp_tmp <- sbp_tmp[time_diff <= 2/12, ]
-length(unique(sbp_tmp$eid)) ### 12140
+length(unique(sbp_tmp$eid))
 
 dbp_tmp <- dbp_all[time_diff >= -5, ]
 dbp_tmp <- dbp_tmp[time_diff <= 2/12, ]
-length(unique(dbp_tmp$eid)) ### 12140
+length(unique(dbp_tmp$eid))
 ### Create data.table ordering by EID and event date
 dbp_tmp <- data.table(dbp_tmp, key=c("eid", "event_dt"))
 sbp_tmp <- data.table(sbp_tmp, key=c("eid", "event_dt"))
@@ -1864,7 +1830,7 @@ dt.s$dep_time_og[is.na(dt.s$dep_time_og)] <- 0
 dt.s$postt2dmdd_time <- dt.s$dep_time_og*dt.s$dep_change_base
 ### Ensure data.table ordering is maintained
 dt.s <- data.table(dt.s, key=c("eid", "time_base"))
-range(dt.s$postt2dmdd_time) ### [1] 0.000000 9.592896
+range(dt.s$postt2dmdd_time)
 
 ### Want a pre-T2D MDD time variable
 ### This will be time between MDD and T2D diagnosis
@@ -1925,8 +1891,8 @@ dt.s <- readRDS(paste(hba1c_dat_path, "data/t2d_imputeprep_ds.rds", sep=""))
 dt.s <- data.table(dt.s, key=c("eid", "time_base"))
 dt.s <- dt.s %>% mutate(previsits_tot = nobs_pre_DBP + nobs_preBMI + obs_pre)
 dt0 <- dt.s[time_base ==0, ]
-meanpre_tot <- mean(dt0$previsits_tot) ### 20.48758
-sdpre_tot <- sd(dt0$previsits_tot) ### 20.03423
+meanpre_tot <- mean(dt0$previsits_tot)
+sdpre_tot <- sd(dt0$previsits_tot)
 dt.s <- dt.s %>% mutate(previsits_tot_std = (previsits_tot - meanpre_tot)/sdpre_tot)
 
 ############################################################################
@@ -1935,16 +1901,16 @@ dt.s <- dt.s %>% mutate(previsits_tot_std = (previsits_tot - meanpre_tot)/sdpre_
 ### standardise pret2dmdd_time
 dt.s <- data.table(dt.s, key=c("eid", "time_base"))
 dt0pre <- dt0[dep_base == 1, ]
-premean <- mean(dt0pre$pret2dmdd_time) ### 12.90697
-presd <- sd(dt0pre$pret2dmdd_time) ### 10.05384
+premean <- mean(dt0pre$pret2dmdd_time)
+presd <- sd(dt0pre$pret2dmdd_time)
 dt.s <- dt.s %>% mutate(pret2dmdd_time_std = ifelse(dep_base == 1, (pret2dmdd_time - premean)/presd, 0))
 
 ### percentile for pret2dmdd_time
 dt.s <- dt.s %>%
         mutate(percentile_pretime = ifelse(dep_base == 0, 0 , pnorm(-1*pret2dmdd_time, mean=-1*premean, sd=presd)))
 ### Robust-scaler for pret2dmdd_time
-Q1 <- quantile(dt0pre$pret2dmdd_time, probs =0.25) ### 5.026712
-Q3 <- quantile(dt0pre$pret2dmdd_time, probs =0.75) ### 17.61943
+Q1 <- quantile(dt0pre$pret2dmdd_time, probs =0.25)
+Q3 <- quantile(dt0pre$pret2dmdd_time, probs =0.75)
 dt.s <- dt.s %>%
         mutate(robust_pretime = ifelse(dep_base == 0, 0 , (pret2dmdd_time - Q1)/(Q3-Q1)))
 dt.s <- dt.s %>%
@@ -2014,4 +1980,4 @@ dt.s1 <- dt.s[lda_keep == 1, ]
 dt.s2 <- dt.s1[, unique(t2d_diag_date), by="eid"]
 dt.s2a <- dt.s2[dt.s2$V1 < "2006-01-01", ]
 dt.s2b <- dt.s2[dt.s2$V1 > "2010-12-31", ]
-(dim(dt.s2a)[1] + dim(dt.s2b)[1])/dim(dt.s2)[1] ### 0.5869274
+(dim(dt.s2a)[1] + dim(dt.s2b)[1])/dim(dt.s2)[1] 

@@ -3,7 +3,7 @@
 ############################################################################
 ### Set up directory where you want to store extracted data
 ############################################################################
-cd path_where_you_to_store_extracted_data
+cd path_to_where_you_store_extracted_data
 mkdir hba1c_dat
 cd hba1c_dat
 ### Recommended to move content from github Input folder to subdirectory inputs

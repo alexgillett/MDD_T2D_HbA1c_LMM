@@ -1,5 +1,5 @@
 ############################################################################
-### 1.2. HbA1c extraction UK Biobank biomarker assessments
+### 1.4. HbA1c extraction UK Biobank biomarker assessments
 ############################################################################
 ### In this script we:
 ### 1. Extract some basic covariate information,
@@ -126,16 +126,8 @@ select(eid, hba1c_bio_0, hba1c_bio_0_corrected, hba1c_date_0) %>%
 rename(hba1c_bio_raw = hba1c_bio_0, hba1c = hba1c_bio_0_corrected, event_dt = hba1c_date_0) %>%
 bind_rows(HbA1c_biomarker_repeat_visit) %>%
 mutate(hba1c_type="biomarker")
-### For reference:
-# dim(HbA1c_biomarker_separate)
-# [1] 480645      5
-#any(HbA1c_biomarker_separate$event_dt == "") # F
-#any(is.na(HbA1c_biomarker_separate$event_dt)) # F
-# any(is.na(HbA1c_biomarker_separate$hba1c)) # F
-#range(HbA1c_biomarker_separate$hba1c) # [1]  17.9035 502.8974
-#sum(HbA1c_biomarker_separate$hba1c > 195) # 5
+
 ### Remove biomarker values > 195
 HbA1c_biomarker_separate <- HbA1c_biomarker_separate[HbA1c_biomarker_separate$hba1c <= 195, ]
-#dim(HbA1c_biomarker_separate)
-# [1] 480640      5
+
 fwrite(HbA1c_biomarker_separate, file=paste(out_path, "/data/HbA1c_biomarker_rowwise.txt", sep=""),col.names=TRUE, row.names=FALSE, quote=FALSE)

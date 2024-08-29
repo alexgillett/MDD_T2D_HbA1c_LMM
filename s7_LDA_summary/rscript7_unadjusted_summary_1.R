@@ -27,7 +27,7 @@ library(lmeInfo)
 library(msm)
 library(mitml)
 ### Assign paths to relevant directories
-hba1c_dat_path <- "/path_where_you_to_store_extracted_data/hba1c_data/"
+hba1c_dat_path <- "/path_to_where_you_store_extracted_data/hba1c_data/"
 analysis_dir <- "/path_to_analysis_dir/"
 
 ############################################################################

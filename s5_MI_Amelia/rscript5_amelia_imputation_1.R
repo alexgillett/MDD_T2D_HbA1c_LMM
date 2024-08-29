@@ -94,11 +94,9 @@ dat.base <- dt.s[dt.s$time_base ==0, ]
 hba1c_observed <- dat.base$hba1c[!is.na(dat.base$hba1c)]
 range(hba1c_observed) ### 30 184
 quantile(hba1c_observed, probs = c(0, 0.005, 0.01, 0.02))
-# 0% 0.5%   1%   2% 
-#  30   41   43   47
+
 quantile(hba1c_observed, probs = c(0, 0.005, 0.01, 0.012, 0.013, 0.0131, 0.015))
-#       0%     0.5%       1%     1.2%     1.3%    1.31%     1.5%
-# 30.00000 41.00000 43.00000 44.00000 44.38905 44.72105 45.00000
+
 unique(dt.s$hba1c_std[dt.s$hba1c == 43])
 ### Corresponds to a standardised HbA1c of -0.9865925
 unique(dt.s$hba1c_std[dt.s$hba1c == 184])

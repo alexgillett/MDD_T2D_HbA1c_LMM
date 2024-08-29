@@ -15,8 +15,6 @@
 # User add library path where R packages are stored if required:
 #.libPaths(new = "your_rlibrary_path")
 ############################################################################
-### Add R packages:
-.libPaths(new = "/scratch/prj/ukbiobank/usr/alex_gillett/software/Rpackages/")
 # Load libraries
 library(data.table)
 library(lubridate)
@@ -31,7 +29,7 @@ library(lmeInfo)
 library(msm)
 library(mitml)
 ### Assign paths to relevant directories
-hba1c_dat_path <- "/path_where_you_to_store_extracted_data/hba1c_data/"
+hba1c_dat_path <- "/path_to_where_you_store_extracted_data/hba1c_data/"
 analysis_dir <- "/path_to_analysis_dir/"
 
 ############################################################################

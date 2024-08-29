@@ -43,7 +43,7 @@ library(readr)
 library(zoo)
 library(DescTools)
 ### Assign paths to relevant directories
-out_path <- "/path_where_you_to_store_extracted_data/hba1c_data/"
+out_path <- "/path_to_where_you_store_extracted_data/hba1c_data/"
 project_dir <- "/path_to_your_ukb_data_dir/"
 depression_dir <- "/path_to_extracted_depression_data/"
 analysis_dir <- "/path_to_analysis_dir/"
@@ -77,9 +77,8 @@ range(hba1c_tab$event_dt) ### "1950-07-28" "2017-09-27"
 hba1c_tab <- hba1c_tab[hba1c_tab$event_dt != "1950-07-28", ]
 range(hba1c_tab$event_dt) ### "1989-02-20" "2017-09-27"
 hba1c_tab <- hba1c_tab%>%
-    distinct() 
-dim(hba1c_tab) ### For reference, values we have are: [1] 686449      3
-length(unique(hba1c_tab$eid)) ### For reference, values we have are: 107418
+    distinct()
+
 
 ### Transform HbA1c values to IFCC values instead of DCCT values:
 ### remove values between 15 and 20 as we can't be sure whether these values are very low IFCC or very high DCCT values
@@ -99,7 +98,7 @@ mutate(hba1c_v2 = ifelse((raw_HbA1c_result >= 3.5 & raw_HbA1c_result <20), round
 ### Save GP merged and tranformed data:
 fwrite(hba1c_tab, paste(out_path, "data/hba1c_read2_read3_original_transformed_values.txt", sep=""),
   col.names=TRUE, row.names=FALSE, quote=FALSE)
-#hba1c_tab <- fread(paste(out_path, "data/hba1c_read2_read3_original_transformed_values.txt", sep=""))
+
 ### remove original read2, read3 HbA1c files:
 rm(hba1c_read2, hba1c_read3)
 
@@ -111,8 +110,7 @@ HbA1c_biomarker_separate <- fread(paste(out_path, "data/HbA1c_biomarker_rowwise.
 ### Make sure columns names are suitable for merging
 ### Make sure dates are in correct format in both datasets
 hba1c_ids <- hba1c_tab %>%
-distinct(eid, .keep_all=FALSE) 
-dim(hba1c_ids) ### For reference: [1] 106506      1
+distinct(eid, .keep_all=FALSE)
 
 HbA1c_biomarker_separate <- HbA1c_biomarker_separate %>%
 filter(eid %in% hba1c_ids$eid) %>%
@@ -125,17 +123,14 @@ hba1c_tab <- hba1c_tab %>%
 ### Merge
 hba1c_tab <- hba1c_tab %>%
 rename(hba1c = hba1c_v2)%>%
-bind_rows(HbA1c_biomarker_separate) 
-
-dim(hba1c_tab) ### [1] 684109      6
-length(unique(hba1c_tab$eid)) ### 106506
+bind_rows(HbA1c_biomarker_separate)
 
 ############################################################################
 ### 2. Merge main HbA1c dataset with depression case/ control data
 ############################################################################
 ### Add depression cases/controls to HbA1c data
 ### Depression EIDs:
-dep_eid <- fread(paste(depression_dir, "dep_AD_eids_ukb82087.txt", sep=""), header=T)
+dep_eid <- fread(paste(depression_dir, "dep_AD_eids.txt", sep=""), header=T)
 ### Binary yes/no depression variable for those in HbA1c main dataset:
 depression <- as.numeric(hba1c_tab$eid %in% dep_eid$eid)
 ### Add binary depression variable to main HbA1c dataset
@@ -227,7 +222,6 @@ test2 %>%
     type="prescription") %>%
     rename(event_dt=issue_date) %>%
     mutate(event_dt=as.Date(event_dt, "%d/%m/%Y")) -> test2
-range(test2$event_dt,na.rm=T) # [1] "1902-02-02" "2018-04-12"
 
 ### Add in additional medication information specific to each drug contained in med_names
 test2 %>%
@@ -238,7 +232,6 @@ select(-read_2,-bnf_code,-dmd_code,-rest2,-rest) -> drug_data
 drug_data <- drug_data[!is.na(drug_data$event_dt), ]
 ### Remove rows with incorrect dates
 drug_data <- drug_data[drug_data$event_dt != "1902-02-02", ]
-range(drug_data$event_dt) # "1986-05-13" "2018-04-12"
 
 ### Read2 extracted drug data
 drug_read2 %>%
@@ -246,8 +239,6 @@ rename(event_dt=issue_date) %>%
 mutate(event_dt=as.Date(event_dt, "%d/%m/%Y"),
 	type="prescription") %>%
 select(eid, data_provider, event_dt, drug_name, quantity,type, drug_substance,drug_class1, drug_class2) -> drug_read2
-sum(is.na(drug_read2$event_dt)) #0
-range(drug_read2$event_dt) #[1] "1986-12-09" "2019-05-06"
 
 ### Combine drug name (bnf/dmd) and read2 files and make subset based on people who have hba1c values
 drug_data %>%
@@ -255,7 +246,6 @@ bind_rows(drug_read2) %>%
 distinct() %>%
 filter(eid %in% hba1c_ids$eid) %>%
 mutate(event_dt=as.Date(event_dt, "%Y-%m-%d")) -> drug_data_hba1csubset
-#range(drug_data_hba1csubset$event_dt) # [1] "1986-05-13" "2019-05-06"
 
 drug_data_hba1csubset$drug_class2[which(drug_data_hba1csubset$drug_class2=="")] <- NA
 
@@ -288,11 +278,9 @@ drug_data_hba1csubset %>%
   mutate(med_end = max(event_dt, na.rm=T)) %>%
   ungroup() -> drug_data_hba1csubset_v2
 
-dim(drug_data_hba1csubset_v2)
-# [1]  1701851      16
 
 ### Save medication file
-fwrite(drug_data_hba1csubset_v2, paste(out_path, "data/ukb82087_gp_diabetes_medication_data.txt", sep=""),
+fwrite(drug_data_hba1csubset_v2, paste(out_path, "data/gp_diabetes_medication_data.txt", sep=""),
   col.names=TRUE, row.names=FALSE, quote=FALSE, sep="\t")
 
 ############################################################################
@@ -301,7 +289,7 @@ fwrite(drug_data_hba1csubset_v2, paste(out_path, "data/ukb82087_gp_diabetes_medi
 ### READ IN hba1c_tab_dep
 ### READ IN drug_data_hba1csubset_v2
 hba1c_tab_dep <- fread(paste(out_path, "data/HbA1c_data_clean_dep.txt", sep=""))
-drug_data_hba1csubset_v2 <- fread(paste(out_path, "data/ukb82087_gp_diabetes_medication_data.txt", sep=""))
+drug_data_hba1csubset_v2 <- fread(paste(out_path, "data/gp_diabetes_medication_data.txt", sep=""))
 ### Make sure date columns are formatted a dates using as.Date:
 drug_data_hba1csubset_v2$event_dt <- as.Date(drug_data_hba1csubset_v2$event_dt)
 drug_data_hba1csubset_v2$prev_drug_date <- as.Date(drug_data_hba1csubset_v2$prev_drug_date)
@@ -312,22 +300,20 @@ hba1c_tab_dep$dob <- as.Date(hba1c_tab_dep$dob)
 
 ### EIDs with HbA1c data available:
 hba1c_ids <- unique(hba1c_tab_dep$eid)
-### FYI: length(hba1c_ids) ### 106506
+
 
 ### Restrict drug dataset to HbA1c EIDs:
 drug_data_hba1csubset_v2 <- drug_data_hba1csubset_v2[(drug_data_hba1csubset_v2$eid %in% hba1c_ids), ]
 dim(drug_data_hba1csubset_v2)
-### [1] 1701851      16
+
 
 ### Bind rows for HbA1c data and prescription data
 hba1c_tab_dep %>%
 bind_rows(drug_data_hba1csubset_v2) -> hba1c_v2
 
-dim(hba1c_v2)
-### [1] 2385960      21
 
 ### save combined medication hba1c file
-fwrite(hba1c_v2, paste(out_path, "data/ukb82087_gp_hba1c_medication_data.txt", sep=""),
+fwrite(hba1c_v2, paste(out_path, "data/gp_hba1c_medication_data.txt", sep=""),
   col.names=TRUE, row.names=FALSE, quote=FALSE, sep="\t")
 rm(drug_data_hba1csubset)
 rm(dep_eid, dob)
@@ -425,10 +411,6 @@ saveRDS(hba1c_v3dt, file=paste(out_path, "data/HbA1c_full_data_medication_coded.
 ############################################################################
 ### 6. Create the T2D case-control phenotype
 ############################################################################
-### Start with each possible route to T2D case status (HbA1c > 48 mmol/mol,
-###
-###
-############################################################################
 ### 6a. HbA1c > 48
 ############################################################################
 hba1c_v9 <- readRDS(file=paste(out_path, "data/HbA1c_full_data_medication_coded.rds", sep=""))
@@ -472,8 +454,6 @@ t2d_sr_1220 <- apply(X=t2d_wrk, FUN = function(X){as.numeric(any(X == "1220", na
 t2d_sr_Combined <- as.numeric(t2d_sr_1223+t2d_sr_1220 > 0)
 sr_diabetes$t2d_sr_Combined<-t2d_sr_Combined
 print(table(sr_diabetes$t2d_sr_Combined))
-###      0      1 
-###   475797  26614
 
 # b) diabetes self-report interview touchscreen (variable 2443)
 diab_touch_code <- "1"
@@ -482,34 +462,12 @@ t2d_wrk <- sr_diabetes[, 2:5]
 diab_touch_Combined <- apply(X=t2d_wrk, FUN = function(X){as.numeric(any(X == "1", na.rm=T))}, MARGIN=1)
 sr_diabetes$diab_touch_Combined<-diab_touch_Combined
 print(table(sr_diabetes$diab_touch_Combined))
-#      0      1 
-#   474169  28242 
 
 ### combine touchscreen with nurse interview diagnosis
-### first see if anyone has 0 for diagnosis at one timepoint but 1 at other timepoint
-check1 <- as.numeric((sr_diabetes$diab_touch_Combined==1 | sr_diabetes$t2d_sr_Combined ==1))
-check2 <- as.numeric((sr_diabetes[,2]==0 & sr_diabetes[,3] ==0 & sr_diabetes[,4] == 0))
-check3 <- check1 + check2
-table(check3)
-check3
-#    0     1     2 
-# 1750 36129     7 
-### Looks like 7 peple who have diabetes in the sr, but 0 right up until last time touch time point...
-
-print(length(which((sr_diabetes$diab_touch_Combined==1 | sr_diabetes$t2d_sr_Combined ==1) & (sr_diabetes$f.2443.0.0 == 0 & sr_diabetes$f.2443.1.0 == 0 & sr_diabetes$f.2443.2.0 == 0))))
-# 0 
-
-table(sr_diabetes$t2d_sr_Combined, sr_diabetes$diab_touch_Combined)
-### Numbers (20230524):
-#          0      1
-#  0   473860   1937
-#  1      309  26305
 
 sr_diabetes$t2d_sr_diagnosis <- as.numeric((sr_diabetes$t2d_sr_Combined + sr_diabetes$diab_touch_Combined) > 0)
 
 print(summary(as.factor(sr_diabetes$t2d_sr_diagnosis)))
-#      0      1 
-#  473860  28551 
 
 ### exclusion criteria
 # other diabetes diagnosis (type 1, gestational, insipidus)
@@ -522,29 +480,23 @@ for(indiv in 1:dim(sr_diabetes)[1]){
 sr_diabetes$diab_other_Combined<-diab_other_Combined
 sr_diabetes$diab_other_Combined[c(diab_other_Combined == 1)] <- 1
 print(table(sr_diabetes$diab_other_Combined))
-#      0      1 
-#  501553    858 
 
 
 # add touchscreen gestational diabetes to this variable
 sr_diabetes$diab_other_Combined[which(sr_diabetes$"4041-0.0" == 1 | sr_diabetes$"4041-1.0" == 1 | sr_diabetes$"4041-2.0" == 1 | sr_diabetes$"4041-3.0" == 1)] <- 1
 print(table(sr_diabetes$diab_other_Combined))
-#      0      1 
-#  500668   1743 
+
 
 # insulin within first year of diagnosis
 sr_diabetes$insulin_first_year <- NA
 sr_diabetes$insulin_first_year[which(sr_diabetes$"2986-0.0" == 1 | sr_diabetes$"2986-1.0" == 1 | sr_diabetes$"2986-2.0" == 1 | sr_diabetes$"2986-3.0" == 1)] <- 1
 print(table(sr_diabetes$insulin_first_year))
-#    1 
-#  3124
+
 
 # individuals with diagnosis under age 35 or missing age at diagnosis (for self-report)
 sr_diabetes$under35 <- NA
 sr_diabetes$under35[which(sr_diabetes$"2976-0.0" <= 35 | sr_diabetes$"2976-1.0" <= 35 | sr_diabetes$"2976-2.0" <= 35 | sr_diabetes$"2976-3.0" <= 35)] <- 1
 print(table(sr_diabetes$under35))
-#    1 
-#  3278 
 
 # excluded individuals diagnosed with diabetes within the year prior to the baseline study visit
 # unable to determine whether they were using insulin within the first year
@@ -554,15 +506,12 @@ sr_diabetes$diff_age_1[which((sr_diabetes$"21003-0.0" - sr_diabetes$"2976-0.0" =
   (sr_diabetes$"21003-2.0" - sr_diabetes$"2976-2.0" == 1) | 
   (sr_diabetes$"21003-3.0" - sr_diabetes$"2976-3.0" == 1))] <- 1
 print(table(sr_diabetes$diff_age_1))
-#  1
-# 2700
 
 # combine exclusion criteria
 sr_diabetes$exclusion_sr <- NA
 sr_diabetes$exclusion_sr[which(sr_diabetes$diab_other_Combined == 1 | sr_diabetes$insulin_first_year == 1 | sr_diabetes$under35 == 1 | sr_diabetes$diff_age_1 == 1)] <- 1
 print(table(sr_diabetes$exclusion_sr))
-#  1
-# 8894
+
 
 ## remove exclusion from cases
 sr_diabetes$t2d_sr_diagnosis_clean <- sr_diabetes$t2d_sr_diagnosis
@@ -575,11 +524,10 @@ sr_diabetes <- readRDS(paste(out_path, "data/self_report_diabetes_subset_diagnos
 #self_report_diab <- sr_diabetes[, c("eid", "t2d_sr_diagnosis_clean")]
 sr_diabetes %>% 
 select(eid, t2d_sr_diagnosis_clean) -> self_report_diab
-#      0      1 
-# 473772  19745 
+
 table(self_report_diab$t2d_sr_diagnosis_clean)
 
-sum(is.na(self_report_diab$t2d_sr_diagnosis_clean)) #8894
+sum(is.na(self_report_diab$t2d_sr_diagnosis_clean))
 
 ############################################################################
 ### 6c. HES diagnostic code
@@ -701,22 +649,12 @@ hba1c_over48[hba1c_over48 == -999] <- 0
 hes_diag_dm[hes_diag_dm == -999] <- 0
 
 temp <- t2d_sr_diagnosis_clean + gp_t2d + medication_gp + hba1c_over48 + hes_diag_dm
-# temp
-#     0      1      2      3      4      5 
-#273074  18897  34721  76010 144737 136670 
+
 temp2 <- as.numeric(temp > 1)
-table(temp2)
-#temp2
-#     0      1 
-#291971 392138 
 
 hba1c_tab_v3$t2d_diagnosis_all_tmp <- temp2
 hba1c_tab_v3[, t2d_diagnosis_all_v2:= as.numeric(any(t2d_diagnosis_all_tmp > 0)), by=eid]
 
-check <- hba1c_tab_v3[, unique(t2d_diagnosis_all_v2), by=eid]
-length(unique(hba1c_tab_v3$eid)) - dim(check)[1]
-# [1] 0 :-)
-rm(check)
 
 ############################################################################
 ### 6g. First date of recorded diabetes
@@ -786,7 +724,7 @@ bind_rows(t2d_hes_first_code) -> t2d_first_code
 
 ### get t2d first date based on medication
 
-t2d_meds_first_code<-fread(paste(out_path, "data/ukb82087_gp_diabetes_medication_data.txt", sep=""),header=T)
+t2d_meds_first_code<-fread(paste(out_path, "data/gp_diabetes_medication_data.txt", sep=""),header=T)
 t2d_meds_first_code <- t2d_meds_first_code %>%
 mutate(event_dt=as.Date(event_dt, "%Y-%m-%d")) %>%
 filter(eid %in% ids_t2d_cases$eid & event_dt>"1902-02-02") %>%
@@ -842,7 +780,7 @@ table(t2d_first_code_v3$type_first_date)
 t2d_first_code_v3$type_first_date[t2d_first_code_v3$type_first_date == "NA/NA/NA"] <- NA
 t2d_first_code_v3$type_first_date[t2d_first_code_v3$type_first_date == "NA/NA/NA/NA"] <- NA
 
-saveRDS(t2d_first_code_v3, file=paste(out_path, "data/ukb82087_t2d_first_occurrence.rds", sep=""))
+saveRDS(t2d_first_code_v3, file=paste(out_path, "data/t2d_first_occurrence.rds", sep=""))
 
 rm(t2d_first_code_v2, t2d_first_code_v4, t2d_first_code_v4i)
 
@@ -901,10 +839,6 @@ hba1c_tab_v4 %>%
 left_join(covariates) -> hba1c_tab_v4
 
 hba1c_tab_v4 <- hba1c_tab_v4[!is.na(hba1c_tab_v4$sex), ]
-### Check t2d phenotype- should be 0 and 1 for an eid consistently...
-length(unique(hba1c_tab_v4$eid[hba1c_tab_v4$t2d_diagnosis_all_v2 == 1])) ### 17735
-length(unique(hba1c_tab_v4$eid[hba1c_tab_v4$t2d_diagnosis_all_v2 == 0])) ### 87594
-length(unique(hba1c_tab_v4$eid[hba1c_tab_v4$t2d_diagnosis_all_v2 == 1]))  + length(unique(hba1c_tab_v4$eid[hba1c_tab_v4$t2d_diagnosis_all_v2 == 0])) - length(unique(hba1c_tab_v4$eid)) ### 0 :-)
  
 saveRDS(hba1c_tab_v4, paste(out_path, "HbA1c_full_data_medication_coded_t2d_first_occ.rds", sep=""))
 
@@ -988,10 +922,6 @@ select(FID, IID, t2d_diagnosis_all_v2) -> t2d_pheno_tmp
 covar %>% select(FID, IID) %>%
 left_join(t2d_pheno_tmp) -> t2d_pheno_PRSice
 
-### with genetic data available...
-# table(t2d_pheno_PRSice$t2d_diagnosis_all_v2)
-#     0     1 
-#  85606 17250  
 
 ### The above includes is all ancestries and all degree of genetic relatedness.
 
@@ -1002,7 +932,7 @@ left_join(t2d_pheno_tmp) -> t2d_pheno_PRSice
 ### GenoPrep is written and maintained by Oliver Pain.
 
 EUR_qc_rows <- read.table(file="/path_to_ukbiobank_QC_dir/UKB.postQC.EUR.keep", header=F)
-dim(EUR_qc_rows) ### [1] 445255      2
+
 ### Read in your applications fam file
 fam_file <- read.table(file="/path_to_your_ukbiobank_genotyped_data/applicationfamfile.fam", header=F)
 ### Extract European rows of fam file

@@ -31,7 +31,7 @@ library(msm)
 library(mitml)
 library(rms)
 ### Assign paths to relevant directories
-hba1c_dat_path <- "/path_where_you_to_store_extracted_data/hba1c_data/"
+hba1c_dat_path <- "/path_to_where_you_store_extracted_data/hba1c_data/"
 analysis_dir <- "/path_to_analysis_dir/"
 ############################################################################
 ### 1. Load in data from MI (Amelia)
@@ -82,26 +82,15 @@ for(i in 1:50){
 ### This is to create LDA datasets
 ############################################################################
 dt.s <- dt.s[time_base > 0, ]
-dim(dt.s) ### 152838    136
-length(unique(dt.s$eid)) ## 12459
+dim(dt.s)
+length(unique(dt.s$eid))
 ### Count the number of rows per ID:
 count.tab <- dt.s[, .(rowCount = .N), by=eid]
-table(count.tab$rowCount) ### 532 individuals with only 1 post T2D row - remove
+table(count.tab$rowCount) ### There are individuals with only 1 post T2D row - remove
 eids_rm <- count.tab$eid[count.tab$rowCount == 1]
 dt.s <- dt.s[!(eid %in% eids_rm), ]
 dt.s <- data.table(dt.s, key=c("eid", "time_base"))
-### Test that this list will be the same for inputation datasets (it should be...)
-#test.dt <- hba1c.imp$imputations[[1]]
-#test.dt <- test.dt[time_base > 0, ]
-#dim(test.dt) ### 152838    35
-#length(unique(test.dt$eid)) ### 12459
-#count.tab <- test.dt[, .(rowCount = .N), by=eid]
-#table(count.tab$rowCount) ### 532 individuals with only 1 post T2D row - remove
-#eids_rmtest <- count.tab$eid[count.tab$rowCount == 1]
-#table(eids_rmtest - eids_rm) ### 0= 532
-#rm(count.tab, test.dt, eids_rmtest)
-### End of test: yes same list of removals...
-### Do the same for imputation datasets
+
 for(i in 1:50){
     dti <- hba1c.imp$imputations[[i]]
     dti <- data.table(dti, key=c("eid", "time_base"))
@@ -140,8 +129,8 @@ rm(depgrouptab)
 ### Includes removing those missing self-reported ethnicity
 ############################################################################
 ### Add in splines, and standardised time_base variable...
-#table(dt.s$eid - hba1c.imp$imputations[[1]]$eid) ### 0
-#table(dt.s$time_base - hba1c.imp$imputations[[1]]$time_base) ### 0
+#table(dt.s$eid - hba1c.imp$imputations[[1]]$eid)
+#table(dt.s$time_base - hba1c.imp$imputations[[1]]$time_base)
 ### order is therefore the same across dt.s and imputation datasets...
 ### using 4 knots due to interactions tested and sample size
 spline <- rcs(dt.s$time_base, 4)
@@ -168,9 +157,9 @@ for(i in 1:50){
 ### could be imputed from the info provided tbh...
 ### Introduce NAs back in for these at least...
 eids_na_ga <- unique(dt.s$eid[is.na(dt.s$pop)])
-length(eids_na_ga) ### 845
+length(eids_na_ga)
 eids_na_srethn <- unique(dt.s$eid[is.na(dt.s$sr_ethnicity_f)])
-length(eids_na_srethn) ### 90
+length(eids_na_srethn)
 for(i in 1:50){
     dti <- hba1c.imp$imputations[[i]]
     dti <- data.table(dti, key=c("eid", "time_base"))
@@ -180,8 +169,6 @@ for(i in 1:50){
     hba1c.imp$imputations[[i]] <- dti
     rm(dti)
 }
-### Due to differences in missingness, consider making sr_ethnicity focus of main analysis.
-### Although Other could be considered missing and this has 1927 individuals in it >> 845 missing genetic ancestry...
 
 ### Make factors and other preps...
 dt.s <- data.table(dt.s, key=c("eid", "time_base"))
